@@ -14,7 +14,9 @@ import {
   Text,
   useColorScheme,
   View,
-  Pressable
+  Pressable,
+  Dimensions,
+  Image,
 } from 'react-native';
 
 import {
@@ -27,6 +29,7 @@ import {
 import jwt_decode from 'jwt-decode';
 import PublicClientApplication from 'react-native-msal';
 import NetInfo from '@react-native-community/netinfo';
+import Scanner from './Components/scanner';
 
 function Section({children, title}) {
   const isDarkMode = useColorScheme() === 'dark';
@@ -57,6 +60,11 @@ function Section({children, title}) {
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
   const [pca, setPca] = useState(null);
+  const {height, width} = Dimensions.get('window');
+  const [result, setResult] = useState(['']);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [loginStatus, setLoginStatus] = useState(false);
 
   useEffect(() => {
     const componentDidMount = async () => {
@@ -91,29 +99,124 @@ function App() {
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <Pressable
-        onPress={async () => {
-          let isConnected = false;
-          await NetInfo.fetch().then(state => {
-            isConnected = state.isConnected;
-          });
-          if (!isConnected) {
-            Alert.alert(
-              'Internet Connection Lost',
-              'Please check your internet connection',
-              [{text: 'OK'}],
-            );
-            return false;
-          }
-          // Acquiring a token for the first time, you must call pca.acquireToken
-          let scopes = ['profile', 'email'];
-          let params = {scopes};
-          let result;
-          result = await pca.acquireToken(params);
-          console.log('SSO Result ==> ', result);
-        }}>
-        <Text>Login</Text>
-      </Pressable>
+
+      <View style={{display: 'flex', backgroundColor: 'white', height: height}}>
+        <View style={{display: 'flex'}}>
+          <View style={{alignItems: 'center'}}>
+            <Image
+              source={require('../auth/assets/uni_logo.png')}
+              style={{
+                height: height * 0.1,
+                width: width * 0.3,
+                resizeMode: 'contain',
+              }}
+            />
+          </View>
+
+          {loginStatus ? (
+            <>
+              <Text
+                style={{
+                  color: 'black',
+                  marginLeft: 10,
+                  fontSize: height * 0.03,
+                  fontWeight: '500',
+                }}>
+                Student Attendance Portal
+              </Text>
+
+              <Text
+                style={{
+                  color: 'grey',
+                  marginLeft: 10,
+                  fontSize: height * 0.025,
+                  marginTop: 20,
+                  fontWeight: '500',
+                }}>
+                Your Details
+              </Text>
+              <Text
+                style={{
+                  color: 'black',
+                  marginLeft: 10,
+                  marginTop: 10,
+                  fontSize: height * 0.016,
+                }}>
+                Name: {name}
+              </Text>
+              <Text
+                style={{
+                  color: 'black',
+                  marginLeft: 10,
+                  fontSize: height * 0.016,
+                }}>
+                Email: {email}
+              </Text>
+            </>
+          ) : (
+            <View
+              style={{
+                marginLeft: 10,
+                marginTop: height * 0.2,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text style={{color: 'black'}}>
+                You are not logged in. Press the login button below
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {loginStatus ? <Scanner/> : (
+          <View
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: height * 0.25,
+            }}>
+            <Pressable
+              onPress={async () => {
+                let isConnected = false;
+                await NetInfo.fetch().then(state => {
+                  isConnected = state.isConnected;
+                });
+                if (!isConnected) {
+                  Alert.alert(
+                    'Internet Connection Lost',
+                    'Please check your internet connection',
+                    [{text: 'OK'}],
+                  );
+                  return false;
+                }
+                // Acquiring a token for the first time, you must call pca.acquireToken
+                let scopes = ['profile', 'email'];
+                let params = {scopes};
+                let result;
+                result = await pca.acquireToken(params);
+                console.log('SSO Result ==> ', result);
+                const {email, name} = result.account.claims;
+                setLoginStatus(true);
+                setResult(result);
+                setName(name);
+                setEmail(email);
+              }}>
+              <Text
+                style={{
+                  color: 'black',
+                  color: '#0c4ca3',
+                  backgroundColor: '#d6e8fc',
+                  padding: width * 0.05,
+                  borderRadius: 20,
+                  paddingHorizontal: width * 0.1,
+                }}>
+                Login
+              </Text>
+            </Pressable>
+          </View>
+        )}
+      </View>
     </SafeAreaView>
   );
 }
