@@ -30,32 +30,8 @@ import jwt_decode from 'jwt-decode';
 import PublicClientApplication from 'react-native-msal';
 import NetInfo from '@react-native-community/netinfo';
 import Scanner from './Components/scanner';
+import 'react-native-url-polyfill/auto';
 
-function Section({children, title}) {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -168,7 +144,7 @@ function App() {
           )}
         </View>
 
-        {loginStatus ? <Scanner/> : (
+        {loginStatus ? <Scanner name={name} email={email}/> : (
           <View
             style={{
               flex: 1,

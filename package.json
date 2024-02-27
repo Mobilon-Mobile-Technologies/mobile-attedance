@@ -10,13 +10,17 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.22.2",
     "@react-native-community/netinfo": "^11.3.0",
+    "@supabase/supabase-js": "^2.39.7",
     "expo-camera": "^14.0.5",
     "jwt-decode": "^4.0.0",
     "react": "18.2.0",
     "react-native": "0.73.4",
     "react-native-msal": "^4.0.4",
-    "react-native-vision-camera": "^3.9.0"
+    "react-native-url-polyfill": "^2.0.0",
+    "react-native-vision-camera": "^3.9.0",
+    "url-polyfill": "^1.1.12"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

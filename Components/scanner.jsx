@@ -12,8 +12,10 @@ import {
   useCameraDevice,
   useCodeScanner,
 } from 'react-native-vision-camera';
+import supabase from '../supabase/supabase';
+import 'react-native-url-polyfill/auto';
 
-const Scanner = () => {
+const Scanner = ({name, email}) => {
   const {height, width} = Dimensions.get('window');
   const [hasPermission, setHasPermission] = useState(null);
   const device = useCameraDevice('back');
@@ -66,7 +68,9 @@ const Scanner = () => {
         if (data.status === 'valid') {
           console.log('you scanned a valid qr');
 
-          // updateData(userdata, coursecode, groupcode, token);
+          feedData(coursecode, groupcode);
+
+
         } else {
           console.log('you scanned a inalid qr code');
           setScanned(false);
@@ -79,8 +83,45 @@ const Scanner = () => {
     }
   };
 
+  const feedData = async (coursecode, groupcode) => {
+    try {
+      let {data: prevData, err} = await supabase.from('attendance').select('*');
+
+      if (prevData) {
+        console.log(prevData);
+      }
+
+      const {data, error} = await supabase
+        .from('attendance')
+        .insert([
+          {
+            attendance_id: prevData.length + 1,
+            student_email: email,
+            student_name: name,
+            status: 'Present',
+            group_name: groupcode,
+            course_id: coursecode,
+          },
+        ])
+        .select();
+
+      if (data) {
+        console.log(data);
+        console.log('uploaded');
+        setAttendanceStatus(true);
+      }
+
+      if (error) {
+        console.log(error);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   useEffect(() => {
     requestCameraPermission();
+    console.log(email);
   }, []);
 
   const requestCameraPermission = async () => {
@@ -141,11 +182,20 @@ const Scanner = () => {
               </Text>
             </View>
           ) : (
-            <View style={{marginTop: height * 0.1, justifyContent: 'center', alignItems: 'center'}}>
+            <View
+              style={{
+                marginTop: height * 0.1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
               <Text style={{color: 'black', fontSize: 15, fontWeight: '500'}}>
                 Please wait while we are marking your Attendance
               </Text>
-              <ActivityIndicator size="large" color="#db2032" style={{marginTop: 10}}/>
+              <ActivityIndicator
+                size="large"
+                color="#db2032"
+                style={{marginTop: 10}}
+              />
             </View>
           )}
         </>
