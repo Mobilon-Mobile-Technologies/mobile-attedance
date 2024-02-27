@@ -4,6 +4,7 @@ import {
   PermissionsAndroid,
   Dimensions,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useEffect, useState, useRef} from 'react';
 import {
@@ -17,6 +18,7 @@ const Scanner = () => {
   const [hasPermission, setHasPermission] = useState(null);
   const device = useCameraDevice('back');
   const [scanned, setScanned] = useState(false);
+  const [attendanceStatus, setAttendanceStatus] = useState(false);
 
   const codeScanner = useCodeScanner({
     codeTypes: ['qr', 'ean-13'],
@@ -26,22 +28,21 @@ const Scanner = () => {
     },
   });
 
-  const extractData = (code) => {
+  const extractData = code => {
     const data = code.map(item => {
-      const url=new URL(item.value);
-      const temp=getTokenFromUrl(url);
+      const url = new URL(item.value);
+      const temp = getTokenFromUrl(url);
       console.log(url);
-      checkTokenValidity(temp.token, temp.coursecode, temp.groupcode)
-
+      checkTokenValidity(temp.token, temp.coursecode, temp.groupcode);
     });
   };
 
-  const getTokenFromUrl = (url) => {
+  const getTokenFromUrl = url => {
     const params = {};
     const regex = /[?&]([^=#]+)=([^&#]*)/g;
     let match;
     while ((match = regex.exec(url)) !== null) {
-        params[match[1]] = decodeURIComponent(match[2]);
+      params[match[1]] = decodeURIComponent(match[2]);
     }
     return params;
   };
@@ -51,35 +52,32 @@ const Scanner = () => {
       const response = await fetch(
         `https://sixc1f0487-145f-4e33-8897-641d33f1d0e6.onrender.com/check_status/${token}`,
         {
-          method: "GET",
+          method: 'GET',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       if (response.ok) {
         const data = await response.json();
         console.log(data.status);
 
-        if (data.status === "valid") {
+        if (data.status === 'valid') {
           console.log('you scanned a valid qr');
 
-
           // updateData(userdata, coursecode, groupcode, token);
-
         } else {
-          console.log("you scanned a inalid qr code");
+          console.log('you scanned a inalid qr code');
           setScanned(false);
         }
       } else {
-        throw new Error("Network response was not ok.");
+        throw new Error('Network response was not ok.');
       }
     } catch (error) {
-      console.error("Error during token validity check:", error);
+      console.error('Error during token validity check:', error);
     }
   };
-  
 
   useEffect(() => {
     requestCameraPermission();
@@ -132,11 +130,26 @@ const Scanner = () => {
     );
   }
 
-  
-
   return (
     <View style={{flex: 1}}>
-      {scanned ? <Text style={{color: 'black'}}>Scanned</Text> : (
+      {scanned ? (
+        <>
+          {attendanceStatus ? (
+            <View>
+              <Text style={{color: 'black'}}>
+                Your Attendance has been marked
+              </Text>
+            </View>
+          ) : (
+            <View style={{marginTop: height * 0.1, justifyContent: 'center', alignItems: 'center'}}>
+              <Text style={{color: 'black', fontSize: 15, fontWeight: '500'}}>
+                Please wait while we are marking your Attendance
+              </Text>
+              <ActivityIndicator size="large" color="#db2032" style={{marginTop: 10}}/>
+            </View>
+          )}
+        </>
+      ) : (
         <View
           style={{
             justifyContent: 'center',
