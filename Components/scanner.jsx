@@ -21,6 +21,8 @@ const Scanner = ({name, email}) => {
   const device = useCameraDevice('back');
   const [scanned, setScanned] = useState(false);
   const [attendanceStatus, setAttendanceStatus] = useState(false);
+  const [courseCode,setCourseCode]=useState('');
+  const [groupCode, setGroupCode]=useState('');
 
   const codeScanner = useCodeScanner({
     codeTypes: ['qr', 'ean-13'],
@@ -35,6 +37,8 @@ const Scanner = ({name, email}) => {
       const url = new URL(item.value);
       const temp = getTokenFromUrl(url);
       console.log(url);
+      setCourseCode(temp.coursecode)
+      setGroupCode(temp.groupcode)
       checkTokenValidity(temp.token, temp.coursecode, temp.groupcode);
     });
   };
@@ -69,8 +73,6 @@ const Scanner = ({name, email}) => {
           console.log('you scanned a valid qr');
 
           feedData(coursecode, groupcode);
-
-
         } else {
           console.log('you scanned a inalid qr code');
           setScanned(false);
@@ -86,10 +88,6 @@ const Scanner = ({name, email}) => {
   const feedData = async (coursecode, groupcode) => {
     try {
       let {data: prevData, err} = await supabase.from('attendance').select('*');
-
-      if (prevData) {
-        console.log(prevData);
-      }
 
       const {data, error} = await supabase
         .from('attendance')
@@ -176,10 +174,42 @@ const Scanner = ({name, email}) => {
       {scanned ? (
         <>
           {attendanceStatus ? (
-            <View>
-              <Text style={{color: 'black'}}>
-                Your Attendance has been marked
-              </Text>
+            <View style={{marginTop: height * 0.05}}>
+              <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                <Text style={{color: '#18c964', fontSize: 20}}>
+                  Your Attendance has been marked
+                </Text>
+              </View>
+
+              <View style={{marginLeft: 10}}>
+                <Text
+                  style={{
+                    color: 'grey',
+                    
+                    fontSize: height * 0.025,
+                    marginTop: 20,
+                    fontWeight: '500',
+                  }}>
+                  {groupCode}
+                </Text>
+                <Text
+                  style={{
+                    color: 'black',
+                    
+                    marginTop: 10,
+                    fontSize: height * 0.016,
+                  }}>
+                  {courseCode}
+                </Text>
+                <Text
+                  style={{
+                    color: 'black',
+                    
+                    fontSize: height * 0.016,
+                  }}>
+                  Email: {email}
+                </Text>
+              </View>
             </View>
           ) : (
             <View
