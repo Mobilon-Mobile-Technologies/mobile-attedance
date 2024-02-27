@@ -4,13 +4,20 @@ import {
   PermissionsAndroid,
   Dimensions,
   TouchableOpacity,
-  StyleSheet,
 } from 'react-native';
 import React, {useEffect, useState, useRef} from 'react';
+import {Camera, useCameraDevice,useCodeScanner} from 'react-native-vision-camera';
 
 const Scanner = () => {
   const {height, width} = Dimensions.get('window');
   const [hasPermission, setHasPermission] = useState(null);
+  const device = useCameraDevice('back');
+  const codeScanner = useCodeScanner({
+    codeTypes: ['qr', 'ean-13'],
+    onCodeScanned: (codes) => {
+      console.log(`Scanned ${codes.length} codes!`)
+    }
+  })
 
   useEffect(() => {
     requestCameraPermission();
@@ -46,8 +53,7 @@ const Scanner = () => {
     return (
       <View style={{flex: 1, alignItems: 'center', marginTop: height * 0.2}}>
         <Text style={{color: 'black'}}>No access to camera</Text>
-        <TouchableOpacity
-          onPress={() => setTimeout(() => requestCameraPermission(), 0)}>
+        <TouchableOpacity onPress={() => requestCameraPermission()}>
           <Text
             style={{
               color: 'black',
@@ -64,9 +70,18 @@ const Scanner = () => {
     );
   }
 
+
+
   return (
-    <View style={{flex: 1, backgroundColor: 'red'}}>
-      <Text>Scanner</Text>
+    <View style={{flex: 1}}>
+      <View style={{justifyContent: 'center', alignItems: 'center', marginTop: height*0.1}}>
+        <Camera
+          style={{height: height * 0.5, width: width * 0.8}}
+          device={device}
+          isActive={true}
+          codeScanner={codeScanner}
+        />
+      </View>
     </View>
   );
 };

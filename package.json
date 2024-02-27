@@ -15,7 +15,8 @@
     "jwt-decode": "^4.0.0",
     "react": "18.2.0",
     "react-native": "0.73.4",
-    "react-native-msal": "^4.0.4"
+    "react-native-msal": "^4.0.4",
+    "react-native-vision-camera": "^3.9.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
